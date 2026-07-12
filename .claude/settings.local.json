@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.quppa.net)",
+      "Bash(curl -s \"https://www.quppa.net/studyscores/browse/2024/\")",
+      "Bash(curl -s \"https://www.quppa.net/studyscores/browse/2024/All%20Students,%20Sorted%20by%20Highest%20Scores.html\")",
+      "Bash(curl -s \"https://www.quppa.net/studyscores/browse/2024/Score%20Counts,%20Grouped%20by%20School,%20Sorted%20by%20Highest%20Scores.html\")",
+      "Bash(curl -s \"https://www.quppa.net/studyscores/browse/2024/All%20Students,%20Sorted%20by%20Highest%20Scores.html\" -o students_2024.html)",
+      "Bash(curl -s \"https://www.quppa.net/studyscores/browse/2024/Score%20Counts,%20Grouped%20by%20School,%20Sorted%20by%20Highest%20Scores.html\" -o schools_2024.html)",
+      "Bash(node parse.js)",
+      "Bash(node -e \"const d=require\\('./data.json'\\); console.log\\('schools:',d.schools.length,'students:',d.students.length\\); console.log\\('top school:',d.schools.sort\\(\\(a,b\\)=>b.perfect-a.perfect\\)[0]\\); console.log\\('top student:',d.students[0]\\);\")",
+      "Bash(python -m http.server 8765)",
+      "Bash(curl -s -o /dev/null -w \"index:%{http_code} data:\" \"http://localhost:8765/index.html\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://localhost:8765/data.json\")",
+      "Bash(curl -s -o /dev/null -w \"data:%{http_code} size:%{size_download}\\\\n\" \"http://localhost:8765/data.json\")",
+      "Bash(curl -s -o /dev/null -w \"html:%{http_code} size:%{size_download}\\\\n\" \"http://localhost:8765/index.html\")",
+      "Bash(node -e \"const d=require\\('./data.json'\\); const s=d.schools.find\\(x=>x.name.includes\\('Melbourne High'\\)\\); console.log\\(s.name, 'rank perfect:', s.ranks.perfect, 'top 5 subjects:'\\); s.subjectsList.slice\\(0,5\\).forEach\\(x=>console.log\\(' ', d.subjects[x.sjid].name, 'rank', x.r+'/'+d.subjects[x.sjid].numSchools, 'n='+x.n, 'p='+x.p, 'avg='+x.avg, 'top='+x.top\\)\\);\")",
+      "Bash(curl -s \"https://www.quppa.net/studyscores/browse/2024/Grouped%20by%20School/\")",
+      "Bash(curl -s \"https://www.quppa.net/studyscores/browse/2024/Grouped%20by%20Subject/\")",
+      "Bash(curl -s \"https://www.quppa.net/studyscores/browse/2024/Grouped%20by%20Subject%20and%20School/\")",
+      "Bash(curl -s \"https://www.quppa.net/studyscores/browse/2024/Scaling%20Table.html\")",
+      "Bash(curl -s \"https://www.quppa.net/studyscores/browse/2024/Statistics.html\")"
+    ]
+  }
+}

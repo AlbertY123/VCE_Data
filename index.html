@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VCE Study Scores · 1998–2025 — Archive Explorer</title>
+<meta name="description" content="Explore 27 years of Victorian VCE study scores (1998–2025): search any student, browse schools and subjects, see the scaling table and statistics for every year." />
+<style>
+  :root {
+    --bg: #0c0f15; --bg-2: #0f131b; --panel: #161a23; --panel-2: #1c2130; --panel-3: #242a3b;
+    --border: #262c3a; --border-2: #353b4c;
+    --text: #e7ebf3; --text-2: #c1c7d3; --muted: #8089a0; --muted-2: #5e677c;
+    --accent: #5aa9ff; --accent-2: #7bb8ff; --accent-dim: rgba(90,169,255,0.16);
+    --good: #5cd28f; --good-dim: rgba(92,210,143,0.18);
+    --gold: #ffd166; --gold-dim: rgba(255,209,102,0.16);
+    --warn: #ff9966; --warn-dim: rgba(255,153,102,0.16);
+    --bad: #ff6b6b;
+    --bar: linear-gradient(90deg, #5aa9ff, #5cd28f);
+    --bar-gold: linear-gradient(90deg, #ffd166, #ff9966);
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 12px 32px rgba(0,0,0,0.35);
+    --shadow-lg: 0 24px 64px rgba(0,0,0,0.55);
+    --rail-h1: 52px; --rail-h2: 46px;
+  }
+  :root[data-theme="light"] {
+    --bg: #f5f7fb; --bg-2: #ffffff; --panel: #ffffff; --panel-2: #f1f4fa; --panel-3: #e6ebf4;
+    --border: #e4e8f1; --border-2: #cdd5e3;
+    --text: #161b27; --text-2: #2c3344; --muted: #58617a; --muted-2: #8088a0;
+    --accent: #1c66e8; --accent-2: #1657cc; --accent-dim: rgba(28,102,232,0.10);
+    --good: #1a9b56; --good-dim: rgba(26,155,86,0.12);
+    --gold: #a37100; --gold-dim: rgba(163,113,0,0.10);
+    --warn: #c95a25; --warn-dim: rgba(201,90,37,0.12);
+    --bad: #d33a3a;
+    --shadow: 0 1px 2px rgba(20,30,60,0.06), 0 10px 28px rgba(20,30,60,0.08);
+    --shadow-lg: 0 24px 64px rgba(20,30,60,0.18);
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #f5f7fb; --bg-2: #ffffff; --panel: #ffffff; --panel-2: #f1f4fa; --panel-3: #e6ebf4;
+      --border: #e4e8f1; --border-2: #cdd5e3;
+      --text: #161b27; --text-2: #2c3344; --muted: #58617a; --muted-2: #8088a0;
+      --accent: #1c66e8; --accent-2: #1657cc; --accent-dim: rgba(28,102,232,0.10);
+      --good: #1a9b56; --good-dim: rgba(26,155,86,0.12);
+      --gold: #a37100; --gold-dim: rgba(163,113,0,0.10);
+      --warn: #c95a25; --warn-dim: rgba(201,90,37,0.12);
+      --bad: #d33a3a;
+      --shadow: 0 1px 2px rgba(20,30,60,0.06), 0 10px 28px rgba(20,30,60,0.08);
+      --shadow-lg: 0 24px 64px rgba(20,30,60,0.18);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    min-height: 100vh; -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  button { font-family: inherit; }
+  .num { font-variant-numeric: tabular-nums; }
+  .muted { color: var(--muted); }
+  .hide { display: none !important; }
+  mark { background: var(--gold-dim); color: inherit; padding: 0 1px; border-radius: 2px; }
+
+  /* ---------- Rail ---------- */
+  .rail { position: sticky; top: 0; z-index: 40; background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+  .rail-1 { height: var(--rail-h1); display: flex; align-items: center; gap: 14px; max-width: 1440px; margin: 0 auto; padding: 0 20px; }
+  .brand { display: flex; align-items: baseline; gap: 8px; cursor: pointer; flex-shrink: 0; }
+  .brand .logo { font-weight: 700; font-size: 15.5px; letter-spacing: -0.02em; }
+  .brand .logo .dot { color: var(--accent); }
+  .brand .tag { color: var(--muted); font-size: 11.5px; }
+  @media (max-width: 640px) { .brand .tag { display: none; } }
+  .omni { flex: 1; max-width: 560px; margin: 0 auto; position: relative; }
+  .omni-btn { width: 100%; display: flex; align-items: center; gap: 9px; background: var(--panel); border: 1px solid var(--border);
+    color: var(--muted); border-radius: 10px; padding: 8px 12px; cursor: text; font-size: 13.5px; transition: border-color .15s, background .15s; }
+  .omni-btn:hover { border-color: var(--border-2); }
+  .omni-btn .sicon { opacity: .8; }
+  .omni-btn .kbd { margin-left: auto; display: flex; gap: 3px; }
+  .kbd b { background: var(--panel-3); border: 1px solid var(--border-2); border-bottom-width: 2px; border-radius: 4px;
+    font: 600 10px/1 ui-monospace, monospace; padding: 3px 5px; color: var(--muted); }
+  .rail-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .icon-btn { background: var(--panel); border: 1px solid var(--border); color: var(--text-2); width: 34px; height: 34px;
+    border-radius: 9px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 15px; }
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .rail-2 { height: var(--rail-h2); display: flex; align-items: center; gap: 8px; max-width: 1440px; margin: 0 auto; padding: 0 20px; overflow: visible; }
+  .year-ctrl { position: relative; flex-shrink: 0; }
+  .year-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--panel); border: 1px solid var(--border-2);
+    color: var(--text); border-radius: 9px; padding: 6px 11px; cursor: pointer; font-size: 13.5px; font-weight: 600; }
+  .year-btn .yv { font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+  .year-btn .chev { color: var(--muted); font-size: 10px; }
+  .year-btn:hover { border-color: var(--accent); }
+  .year-btn[disabled] { opacity: .4; cursor: default; }
+  .year-menu { position: absolute; top: calc(100% + 8px); left: 0; z-index: 60; background: var(--bg-2); border: 1px solid var(--border-2);
+    border-radius: 14px; box-shadow: var(--shadow-lg); padding: 14px; width: min(760px, 92vw); }
+  .year-menu h4 { margin: 0 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+  .ridge { display: flex; align-items: flex-end; gap: 3px; height: 88px; padding: 0 2px; }
+  .ridge .col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; position: relative; min-width: 0; }
+  .ridge .bar-wrap { width: 100%; display: flex; flex-direction: column; justify-content: flex-end; height: 68px; }
+  .ridge .bar { width: 100%; background: var(--accent); opacity: .5; border-radius: 2px 2px 0 0; transition: opacity .12s, transform .12s; min-height: 2px; }
+  .ridge .bar .cap { display: block; width: 100%; background: var(--gold); border-radius: 2px 2px 0 0; }
+  .ridge .col:hover .bar { opacity: .95; }
+  .ridge .col.active .bar { opacity: 1; box-shadow: 0 0 0 1px var(--accent); }
+  .ridge .yr { font: 600 8.5px/1 ui-monospace, monospace; color: var(--muted); transform: rotate(-90deg); transform-origin: center; white-space: nowrap; height: 12px; }
+  .ridge .col.gap .bar-wrap { border-left: 1px dotted var(--border-2); opacity: .5; }
+  .ridge .col:hover .tip, .ridge .col.active .tip { opacity: 1; }
+  .ridge .tip { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 4px; background: var(--panel-3);
+    border: 1px solid var(--border-2); border-radius: 6px; padding: 4px 7px; font-size: 11px; white-space: nowrap; opacity: 0; pointer-events: none; z-index: 5; }
+
+  .vtabs { display: flex; gap: 2px; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 3px; overflow-x: auto; scrollbar-width: none; }
+  .vtabs::-webkit-scrollbar { display: none; }
+  .vtab { background: transparent; border: none; color: var(--muted); border-radius: 7px; padding: 6px 13px; cursor: pointer; font-size: 13px; white-space: nowrap; font-weight: 500; }
+  .vtab:hover { color: var(--text); }
+  .vtab.active { background: var(--panel-3); color: var(--text); }
+  .crumb { margin-left: auto; color: var(--muted); font-size: 12.5px; display: flex; align-items: center; gap: 6px; overflow: hidden; }
+  .crumb a { color: var(--muted); }
+  .crumb a:hover { color: var(--accent); }
+  .crumb .sep { opacity: .5; }
+  .crumb .cur { color: var(--text-2); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
+  @media (max-width: 760px) { .crumb { display: none; } }
+
+  /* ---------- Layout ---------- */
+  main { max-width: 1440px; margin: 0 auto; padding: 20px 20px 80px; }
+  .view-loading { padding: 60px; text-align: center; color: var(--muted); }
+  .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--border-2); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -3px; margin-right: 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  h1.page-title { margin: 0 0 3px; font-size: 24px; font-weight: 650; letter-spacing: -0.02em; }
+  h1.page-title .accent { color: var(--accent); }
+  .page-sub { color: var(--muted); font-size: 13px; margin-bottom: 18px; }
+  .page-sub a { color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
+  .section-title { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; margin: 22px 0 10px; }
+
+  /* stat tiles */
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .tile { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 13px 15px; position: relative; overflow: hidden; }
+  .tile .v { font-size: 22px; font-weight: 650; line-height: 1.15; letter-spacing: -0.01em; }
+  .tile .v.gold { color: var(--gold); }
+  .tile .l { color: var(--muted); font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
+  .tile .meta { color: var(--muted); font-size: 11px; margin-top: 4px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .tile .delta.up { color: var(--good); } .tile .delta.down { color: var(--warn); }
+  .rankcap { color: var(--muted-2); font-size: 10.5px; }
+
+  /* panels & tables */
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; }
+  /* round corners without overflow:hidden so sticky headers keep working */
+  .panel > table thead tr:first-child th:first-child { border-top-left-radius: 13px; }
+  .panel > table thead tr:first-child th:last-child { border-top-right-radius: 13px; }
+  .panel > table tbody tr:last-child td:first-child { border-bottom-left-radius: 13px; }
+  .panel > table tbody tr:last-child td:last-child { border-bottom-right-radius: 13px; }
+  .panel > table tbody tr:last-child td { border-bottom: none; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  th { background: var(--panel-2); color: var(--muted); font-weight: 600; font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; user-select: none; position: sticky; top: calc(var(--rail-h1) + var(--rail-h2)); z-index: 3; }
+  th.sortable { cursor: pointer; } th.sortable:hover { color: var(--text); }
+  th .arr { opacity: .55; font-size: 9px; margin-left: 2px; }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; }
+  th.n { text-align: right; }
+  tbody tr.link { cursor: pointer; }
+  tbody tr.link:hover { background: var(--panel-2); }
+  .rankcell { color: var(--muted); width: 46px; font-variant-numeric: tabular-nums; }
+  .rank-1, .rank-2, .rank-3 { color: var(--gold); font-weight: 600; }
+  .empty { padding: 40px; text-align: center; color: var(--muted); }
+  .strong { font-weight: 600; }
+  .sur { font-weight: 600; }
+
+  /* pills */
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--border); font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1.5; }
+  .pill.gold { color: var(--gold); border-color: var(--gold); background: var(--gold-dim); }
+  .pill.good { color: var(--good); border-color: var(--good); background: var(--good-dim); }
+  .pill.accent { color: var(--accent); border-color: var(--accent); background: var(--accent-dim); }
+  .pill.warn { color: var(--warn); border-color: var(--warn); background: var(--warn-dim); }
+  .pill.yr { font-family: ui-monospace, monospace; font-size: 10.5px; padding: 1px 6px; }
+
+  /* sparkline (11 bars 40->50) */
+  .spark { display: inline-flex; align-items: flex-end; gap: 1px; height: 20px; vertical-align: middle; }
+  .spark .b { width: 3px; background: var(--muted-2); border-radius: 1px 1px 0 0; opacity: .55; }
+  .spark .b.hot { background: var(--gold); opacity: .95; } .spark .b.warm { background: var(--accent); opacity: .7; }
+
+  /* toolbar / filters */
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; align-items: center; }
+  input[type=search], input[type=text], select { background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 9px; padding: 8px 12px; font: inherit; transition: border-color .15s; }
+  input:focus, select:focus { outline: none; border-color: var(--accent); }
+  ::placeholder { color: var(--muted-2); }
+  .count { color: var(--muted); font-size: 12.5px; margin-left: auto; }
+  .chipset { display: inline-flex; gap: 4px; }
+  .fchip { background: var(--panel); border: 1px solid var(--border); color: var(--muted); border-radius: 999px; padding: 6px 12px; cursor: pointer; font-size: 12.5px; }
+  .fchip:hover { border-color: var(--border-2); color: var(--text); }
+  .fchip.on { background: var(--accent-dim); border-color: var(--accent); color: var(--text); }
+  .active-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .filter-chip { background: var(--accent-dim); color: var(--text); border: 1px solid var(--accent); border-radius: 999px; padding: 3px 4px 3px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; }
+  .filter-chip .x { background: transparent; color: var(--muted); border: none; cursor: pointer; font-size: 14px; padding: 0 6px; line-height: 1; }
+  .filter-chip .x:hover { color: var(--bad); }
+
+  .pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 16px 0; color: var(--muted); font-size: 12.5px; }
+  .pagination button { background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 6px 14px; cursor: pointer; }
+  .pagination button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .pagination button:disabled { opacity: .35; cursor: not-allowed; }
+
+  .btn { background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 9px; padding: 7px 13px; cursor: pointer; font-size: 12.5px; display: inline-flex; align-items: center; gap: 6px; }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  :root[data-theme="light"] .btn.primary, :root:not([data-theme="dark"]) .btn.primary { color: #fff; }
+  .btn.primary:hover { opacity: .9; color: #fff; }
+
+  /* histogram (40-50) */
+  .histogram { display: grid; grid-template-columns: 30px 1fr 92px; gap: 8px; align-items: center; margin: 4px 0; font-size: 12px; }
+  .histogram .score { color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
+  .histogram .bar-wrap { background: var(--panel-2); border: 1px solid var(--border); border-radius: 5px; overflow: hidden; height: 15px; }
+  .histogram .bar { height: 100%; border-radius: 5px; transition: width .4s; }
+  .histogram .val { text-align: right; color: var(--text-2); font-variant-numeric: tabular-nums; }
+  .histogram .val small { color: var(--muted-2); }
+
+  /* strength bar */
+  .strength { display: grid; grid-template-columns: 1fr 42px; gap: 6px; align-items: center; min-width: 110px; }
+  .strength .track { position: relative; height: 8px; background: var(--panel-3); border-radius: 4px; }
+  .strength .mid { position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: var(--border-2); }
+  .strength .fill { position: absolute; top: 0; bottom: 0; border-radius: 4px; }
+  .strength .fill.pos { background: var(--good); left: 50%; } .strength .fill.neg { background: var(--warn); right: 50%; }
+  .strength .v { color: var(--text-2); font-size: 11.5px; font-variant-numeric: tabular-nums; text-align: right; }
+  .strength .v.pos { color: var(--good); } .strength .v.neg { color: var(--warn); }
+
+  /* scaled twin */
+  .twin { display: inline-flex; align-items: center; gap: 5px; font-variant-numeric: tabular-nums; }
+  .twin .raw { font-weight: 600; }
+  .twin .arrow { color: var(--muted-2); font-size: 11px; }
+  .twin .scaled { color: var(--text-2); }
+  .twin .d { font-size: 10.5px; padding: 0 4px; border-radius: 4px; }
+  .twin .d.up { color: var(--good); background: var(--good-dim); } .twin .d.down { color: var(--warn); background: var(--warn-dim); }
+  .twin .d.flat { color: var(--muted); }
+  .twin.perfect .raw { color: var(--gold); }
+
+  /* subject chips */
+  .subj-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .chip-sm { display: inline-flex; align-items: center; gap: 5px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; font-size: 11.5px; color: var(--text-2); }
+  .chip-sm b { font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .chip-sm.perfect b { color: var(--gold); }
+  .chip-sm .lk { cursor: pointer; } .chip-sm .lk:hover { color: var(--accent); }
+
+  /* mini-table (detail) */
+  .mini-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .mini-table th, .mini-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  .mini-table th { position: static; background: var(--panel-2); text-transform: none; font-size: 11px; letter-spacing: 0; }
+  .mini-table tbody tr:last-child td { border-bottom: none; }
+  .mini-table tbody tr.link:hover { background: var(--panel-2); }
+  .linkish { cursor: pointer; color: var(--text); } .linkish:hover { color: var(--accent); }
+
+  /* detail grid */
+  .detail-grid { display: grid; grid-template-columns: 340px 1fr; gap: 22px; align-items: start; }
+  @media (max-width: 1000px) { .detail-grid { grid-template-columns: 1fr; } }
+  .entity-head { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 6px; }
+  .entity-head h1 { margin: 0; font-size: 25px; font-weight: 680; letter-spacing: -0.02em; }
+  .entity-head .rank-pills { display: flex; flex-wrap: wrap; gap: 5px; }
+  .backlink { color: var(--muted); font-size: 12.5px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; margin-bottom: 12px; }
+  .backlink:hover { color: var(--accent); }
+
+  /* charts (SVG) */
+  .chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .chart .grid line { stroke: var(--border); stroke-width: 1; }
+  .chart .axis text { fill: var(--muted); font-size: 10px; font-variant-numeric: tabular-nums; }
+  .chart .lbl { fill: var(--muted); font-size: 10px; }
+  .chart-legend { display: flex; gap: 14px; flex-wrap: wrap; margin: 8px 0 2px; font-size: 12px; }
+  .chart-legend span { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); }
+  .chart-legend i { width: 12px; height: 3px; border-radius: 2px; display: inline-block; }
+  .cursor-line { stroke: var(--border-2); stroke-width: 1; stroke-dasharray: 3 3; }
+
+  /* scaling matrix */
+  .matrix-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 14px; background: var(--panel); }
+  table.matrix { border-collapse: separate; border-spacing: 0; font-size: 12px; min-width: 720px; }
+  table.matrix th, table.matrix td { border: none; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); padding: 6px 8px; text-align: center; }
+  table.matrix thead th { background: var(--panel-2); font-variant-numeric: tabular-nums; }
+  table.matrix th.subj { position: sticky; left: 0; z-index: 2; background: var(--panel); text-align: left; text-transform: none; letter-spacing: 0; font-size: 12px; font-weight: 500; color: var(--text); white-space: nowrap; cursor: pointer; box-shadow: 1px 0 0 var(--border); }
+  table.matrix thead th.subj { z-index: 4; background: var(--panel-2); }
+  table.matrix td.cell { font-variant-numeric: tabular-nums; color: var(--text-2); position: relative; }
+  table.matrix td.cell.over { outline: 1.5px solid var(--gold); outline-offset: -1.5px; color: var(--gold); font-weight: 600; }
+  table.matrix tbody tr:hover td.subj { color: var(--accent); }
+
+  /* scaling lens converter */
+  .lens { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: center; }
+  @media (max-width: 720px) { .lens { grid-template-columns: 1fr; } }
+  .lens .readout { text-align: center; }
+  .lens .readout .big { font-size: 40px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .lens .readout .big.gold { color: var(--gold); }
+  .lens .readout .lbl { color: var(--muted); font-size: 12px; }
+  .lens .readout .delta { font-size: 15px; font-weight: 600; margin-top: 4px; }
+  .lens .delta.up { color: var(--good); } .lens .delta.down { color: var(--warn); } .lens .delta.flat { color: var(--muted); }
+  .slider-row { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+  input[type=range] { flex: 1; accent-color: var(--accent); }
+  .rawval { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 42px; text-align: center; }
+
+  /* home */
+  .hero { text-align: center; padding: 40px 16px 8px; }
+  .hero h1 { font-size: clamp(26px, 4.5vw, 40px); font-weight: 720; letter-spacing: -0.03em; margin: 0 0 6px; }
+  .hero h1 .accent { color: var(--accent); }
+  .hero .lede { color: var(--muted); font-size: 14.5px; max-width: 560px; margin: 0 auto 22px; }
+  .hero-search { max-width: 620px; margin: 0 auto; position: relative; }
+  .hero-search input { width: 100%; font-size: 17px; padding: 15px 18px 15px 46px; border-radius: 14px; border: 1px solid var(--border-2); background: var(--panel); box-shadow: var(--shadow); }
+  .hero-search .sicon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 17px; }
+  .seed-row { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; margin: 14px 0 4px; }
+  .seed { background: var(--panel); border: 1px solid var(--border); border-radius: 999px; padding: 6px 13px; font-size: 12.5px; color: var(--text-2); cursor: pointer; }
+  .seed:hover { border-color: var(--accent); color: var(--accent); }
+  .totals-strip { display: flex; flex-wrap: wrap; gap: 6px 22px; justify-content: center; margin: 22px 0 6px; color: var(--muted); font-size: 13px; }
+  .totals-strip b { color: var(--text); font-weight: 650; font-variant-numeric: tabular-nums; }
+  .records { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+  .record { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 13px 15px; cursor: pointer; transition: border-color .15s, transform .12s; }
+  .record:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .record .rl { color: var(--muted); font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; }
+  .record .rv { font-size: 20px; font-weight: 680; margin: 2px 0; font-variant-numeric: tabular-nums; }
+  .record .ry { color: var(--accent); font-size: 12.5px; font-weight: 600; }
+  .explore-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+  .ecard { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 15px 16px; cursor: pointer; }
+  .ecard:hover { border-color: var(--accent); }
+  .ecard .et { font-weight: 620; font-size: 14.5px; margin-bottom: 3px; }
+  .ecard .ed { color: var(--muted); font-size: 12.5px; }
+  .home-ridge { padding: 6px 0 0; }
+  .home-ridge .ridge { height: 130px; gap: 4px; }
+  .home-ridge .ridge .bar-wrap { height: 104px; }
+
+  /* command palette */
+  .scrim { position: fixed; inset: 0; background: rgba(4,6,12,0.55); backdrop-filter: blur(3px); z-index: 100; display: flex; align-items: flex-start; justify-content: center; padding: 10vh 16px 16px; }
+  :root[data-theme="light"] .scrim, :root:not([data-theme="dark"]) .scrim { background: rgba(20,30,60,0.28); }
+  .palette { width: 100%; max-width: 680px; background: var(--bg-2); border: 1px solid var(--border-2); border-radius: 16px; box-shadow: var(--shadow-lg); overflow: hidden; display: flex; flex-direction: column; max-height: 74vh; }
+  .palette-top { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+  .palette-top .sicon { color: var(--muted); font-size: 17px; }
+  .palette-input { flex: 1; background: transparent; border: none; color: var(--text); font-size: 16px; padding: 2px 0; }
+  .palette-input:focus { outline: none; }
+  .scope-toggle { display: inline-flex; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 2px; font-size: 11.5px; }
+  .scope-toggle button { background: transparent; border: none; color: var(--muted); border-radius: 6px; padding: 4px 9px; cursor: pointer; }
+  .scope-toggle button.on { background: var(--panel-3); color: var(--text); }
+  .palette-body { overflow-y: auto; padding: 6px 0 8px; }
+  .pgroup-h { padding: 8px 16px 4px; color: var(--muted); font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; display: flex; justify-content: space-between; }
+  .presult { display: flex; align-items: center; gap: 10px; padding: 8px 16px; cursor: pointer; }
+  .presult.sel { background: var(--accent-dim); box-shadow: inset 3px 0 0 var(--accent); }
+  .presult .pmain { min-width: 0; flex: 1; }
+  .presult .pname { font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .presult .psub { color: var(--muted); font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .presult .pmeta { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+  .palette-foot { border-top: 1px solid var(--border); padding: 8px 16px; display: flex; gap: 14px; color: var(--muted-2); font-size: 11px; flex-wrap: wrap; }
+  .palette-foot .k { color: var(--muted); }
+  .palette-empty { padding: 26px 16px; text-align: center; color: var(--muted); font-size: 13px; }
+
+  /* toast */
+  .toast-wrap { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+  .toast { background: var(--panel-3); border: 1px solid var(--border-2); color: var(--text); border-radius: 10px; padding: 9px 15px; font-size: 13px; box-shadow: var(--shadow); animation: toastin .2s ease; }
+  @keyframes toastin { from { opacity: 0; transform: translateY(8px); } }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+  .indexing { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 11.5px; }
+  .dotpulse { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: .3; } 50% { opacity: 1; } }
+
+  @media (max-width: 680px) {
+    main { padding: 14px 12px 80px; }
+    .rail-1, .rail-2 { padding: 0 12px; }
+    .detail-grid { grid-template-columns: 1fr; }
+    th, td { padding: 8px 9px; font-size: 12.5px; }
+    /* wide tables scroll inside their panel so the page body never scrolls sideways */
+    .panel { overflow-x: auto; }
+    .lens { grid-template-columns: 1fr; }
+    .omni { max-width: none; }
+    .brand .tag { display: none; }
+    /* clip (not scroll) any stray horizontal overflow without breaking sticky headers */
+    main { overflow-x: clip; }
+  }
+</style>
+</head>
+<body>
+<div class="rail">
+  <div class="rail-1">
+    <div class="brand" id="brand" title="Home">
+      <span class="logo">Study Scores<span class="dot">.</span></span>
+      <span class="tag">VCE · 1998–2025</span>
+    </div>
+    <div class="omni">
+      <div class="omni-btn" id="omni-btn">
+        <span class="sicon">⌕</span>
+        <span id="omni-label">Search any student, school or subject…</span>
+        <span class="kbd"><b>Ctrl</b><b>K</b></span>
+      </div>
+    </div>
+    <div class="rail-actions">
+      <button class="icon-btn" id="theme-btn" title="Toggle theme">◐</button>
+      <button class="icon-btn" id="help-btn" title="Keyboard shortcuts">?</button>
+    </div>
+  </div>
+  <div class="rail-2" id="rail-2"></div>
+</div>
+<main id="app"><div class="view-loading"><span class="spinner"></span>Loading archive…</div></main>
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+"use strict";
+/* ============================================================ State & utils */
+const M = { manifest: null, GI: null, GIstate: 'none', SCALING: null, subjectDict: null,
+  yearCache: new Map(), yearPromises: new Map(), route: null, year: null, view: null,
+  searchLower: null };
+let YEARS = [];
+
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt = n => (n==null?'–':Number(n).toLocaleString());
+const pct = (n,d) => d ? (n/d*100) : 0;
+function ordinal(n){ const s=['th','st','nd','rd'], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
+function highlight(text, q){ const safe = esc(text); q=(q||'').trim(); if(!q) return safe; const re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','ig'); return safe.replace(re,'<mark>$1</mark>'); }
+function slug(name){ return name.toLowerCase().replace(/&/g,' and ').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
+function toast(msg, ms=2400){ const t=el('div','toast',esc(msg)); $('#toasts').appendChild(t); setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(()=>t.remove(),300); }, ms); }
+
+/* ============================================================ Data layer */
+async function loadManifest(){
+  const r = await fetch('data/manifest.json'); M.manifest = await r.json();
+  YEARS = M.manifest.years.map(y=>y.y);
+  M.subjectDict = new Map(M.manifest.subjects.map(s=>[s.name, s.years]));
+}
+function yearMeta(y){ return M.manifest.years.find(x=>x.y===y); }
+function loadYear(y){
+  if (M.yearCache.has(y)) return Promise.resolve(M.yearCache.get(y));
+  if (M.yearPromises.has(y)) return M.yearPromises.get(y);
+  const p = fetch('data/y'+y+'.json').then(r=>r.json()).then(d=>{
+    // index students by school for quick school->students, and attach helper
+    M.yearCache.set(y, d); M.yearPromises.delete(y); return d;
+  });
+  M.yearPromises.set(y, p); return p;
+}
+function prefetchYear(y){ if(y && YEARS.includes(y) && !M.yearCache.has(y) && !M.yearPromises.has(y)) loadYear(y); }
+async function loadScalingAll(){ if(M.SCALING) return M.SCALING; const r=await fetch('data/scaling-all.json'); M.SCALING=await r.json(); return M.SCALING; }
+function ensureGlobalIndex(){
+  if (M.GIstate==='ready') return Promise.resolve(M.GI);
+  if (M.GIstate==='loading') return M._giPromise;
+  M.GIstate='loading'; updateOmniState();
+  M._giPromise = fetch('data/students-all.json').then(r=>r.json()).then(gi=>{
+    M.GI = gi;
+    // pre-split + lowercase names per year for search
+    M.searchLower = {};
+    for (const y of Object.keys(gi.byYear)) {
+      const b = gi.byYear[y];
+      b.namesArr = b.names.split('\n');
+      M.searchLower[y] = b.namesArr.map(n=>n.toLowerCase());
+    }
+    M.GIstate='ready'; updateOmniState();
+    return gi;
+  }).catch(e=>{ M.GIstate='error'; console.error(e); });
+  return M._giPromise;
+}
+
+/* ============================================================ Scaling helpers */
+function scaledFor(yearData, sjid, raw){ const s = yearData.subjects[sjid]; if(!s||!s.scale) return null; return s.scale[raw-40]; }
+function twinHTML(raw, scaled){
+  if (scaled==null) return `<span class="twin${raw===50?' perfect':''}"><span class="raw">${raw}</span></span>`;
+  const d = +(scaled - raw).toFixed(2);
+  const cls = d>0.05?'up':d<-0.05?'down':'flat';
+  const arrow = d>0.05?'↗':d<-0.05?'↘':'→';
+  const dtxt = (d>0?'+':'')+d.toFixed(1);
+  return `<span class="twin${raw===50?' perfect':''}" title="Raw ${raw} scales to ${scaled}"><span class="raw">${raw}</span><span class="arrow">${arrow}</span><span class="scaled">${(+scaled).toFixed(1)}</span><span class="d ${cls}">${dtxt}</span></span>`;
+}
+
+/* ============================================================ Router */
+function parseHash(){
+  const h = location.hash.replace(/^#\/?/, '');
+  const [pathPart, queryPart] = h.split('?');
+  const parts = pathPart.split('/').filter(Boolean).map(decodeURIComponent);
+  const params = new URLSearchParams(queryPart||'');
+  if (!parts.length) return { name:'home', params };
+  if (parts[0]==='trends') return { name:'trends', params };
+  if (parts[0]==='search') return { name:'search', params };
+  if (parts[0]==='school') return { name:'school-xy', slug:parts[1], params };
+  if (parts[0]==='subject') return { name:'subject-xy', slug:parts[1], params };
+  if (parts[0]==='y') {
+    const year = parseInt(parts[1],10);
+    if (parts[2]==='student') return { name:'student', year, id:parseInt(parts[3],10), params };
+    if (parts[2]==='school') return { name:'school', year, id:parseInt(parts[3],10), params };
+    if (parts[2]==='subject') return { name:'subject', year, id:parseInt(parts[3],10), params };
+    const view = parts[2] || 'overview';
+    return { name:'year', year, view, params };
+  }
+  return { name:'home', params };
+}
+function nav(hash, replace){ if(replace) history.replaceState(null,'',hash); else if(location.hash!==hash) location.hash=hash; else route(); }
+function nearestYear(y){ if(YEARS.includes(y)) return y; let best=YEARS[YEARS.length-1], bd=1e9; for(const yy of YEARS){ const d=Math.abs(yy-y); if(d<bd){bd=d;best=yy;} } return best; }
+
+async function route(){
+  const r = parseHash(); M.route = r;
+  const app = $('#app');
+  // resolve year-bearing routes
+  const needsYear = ['year','student','school','subject'].includes(r.name);
+  if (needsYear) {
+    if (!YEARS.includes(r.year)) { const ny=nearestYear(r.year||YEARS[YEARS.length-1]); toast('No data for '+(r.year||'that year')+' — showing '+ny); nav('#/y/'+ny+(r.view?'/'+r.view:''), true); return; }
+    M.year = r.year;
+  }
+  renderRail();
+  try {
+    if (r.name==='home') return renderHome();
+    if (r.name==='trends') return renderTrends();
+    if (r.name==='search') { openPalette(r.params.get('q')||''); return renderHome(); }
+    if (r.name==='school-xy') return renderSchoolCrossYear(r.slug);
+    if (r.name==='subject-xy') return renderSubjectCrossYear(r.slug);
+    // needs year data
+    app.innerHTML = '<div class="view-loading"><span class="spinner"></span>Loading '+r.year+'…</div>';
+    const d = await loadYear(r.year);
+    // prefetch neighbours
+    prefetchYear(r.year-1); prefetchYear(r.year+1);
+    if (M.route!==r) return; // route changed while loading
+    mergeSubjectDict(d);
+    if (r.name==='student'){ M.view='students'; return renderStudentDetail(d, r.id); }
+    if (r.name==='school'){ M.view='schools'; return renderSchoolDetail(d, r.id); }
+    if (r.name==='subject'){ M.view='subjects'; return renderSubjectDetail(d, r.id); }
+    M.view = r.view;
+    const views = { overview:renderOverview, students:renderStudents, schools:renderSchools, subjects:renderSubjects, scaling:renderScaling, stats:renderStats };
+    (views[r.view]||renderOverview)(d, r.params);
+  } catch(e){ console.error(e); app.innerHTML = '<div class="empty">Something went wrong loading this view. <br><small>'+esc(e.message)+'</small></div>'; }
+  window.scrollTo({top:0});
+}
+function mergeSubjectDict(d){ for(const s of d.subjects){ if(!M.subjectDict.has(s.name)) M.subjectDict.set(s.name, []); } }
+
+/* ============================================================ Rail rendering */
+const VIEWS = [['overview','Overview'],['students','Students'],['schools','Schools'],['subjects','Subjects'],['scaling','Scaling'],['stats','Statistics']];
+function renderRail(){
+  const r = M.route; const rail = $('#rail-2');
+  const hasYear = ['year','student','school','subject'].includes(r.name);
+  const y = hasYear ? M.year : null;
+  const curView = r.name==='year' ? r.view : (r.name==='student'?'students':r.name==='school'?'schools':r.name==='subject'?'subjects':null);
+  let html = '';
+  // Year control
+  const yLabel = y ? y : '—';
+  html += `<div class="year-ctrl"><button class="year-btn" id="year-btn"${hasYear?'':' disabled'}><span class="yv">${yLabel}</span><span class="chev">▼</span></button><div class="year-menu hide" id="year-menu"></div></div>`;
+  // View tabs (only when a year is active)
+  if (hasYear) {
+    html += '<div class="vtabs">' + VIEWS.map(([v,l])=>`<button class="vtab${v===curView?' active':''}" data-view="${v}">${l}</button>`).join('') + '</div>';
+  } else {
+    html += `<div class="vtabs"><button class="vtab${r.name==='home'?' active':''}" data-nav="#/">Home</button><button class="vtab${r.name==='trends'?' active':''}" data-nav="#/trends">All-time trends</button><button class="vtab" data-nav="#/y/${YEARS[YEARS.length-1]}">Browse ${YEARS[YEARS.length-1]}</button></div>`;
+  }
+  html += '<div class="crumb" id="crumb"></div>';
+  rail.innerHTML = html;
+  // events
+  const yb = $('#year-btn'); if (yb && hasYear) yb.onclick = toggleYearMenu;
+  $$('.vtab', rail).forEach(b=>{
+    if (b.dataset.nav) b.onclick = ()=>nav(b.dataset.nav);
+    else b.onclick = ()=>{
+      const v = b.dataset.view;
+      if (r.name==='student'||r.name==='school'||r.name==='subject') nav('#/y/'+y+'/'+v);
+      else nav('#/y/'+y+'/'+v);
+    };
+  });
+  renderCrumb();
+}
+function renderCrumb(){
+  const r = M.route; const c = $('#crumb'); if(!c) return;
+  const parts = [];
+  if (['year','student','school','subject'].includes(r.name)) {
+    parts.push(`<a data-h="#/y/${M.year}">${M.year}</a>`);
+    if (r.name==='year') parts.push(`<span class="cur">${VIEWS.find(v=>v[0]===r.view)?.[1]||r.view}</span>`);
+    if (r.name==='student' && M.yearCache.get(M.year)) parts.push(`<a data-h="#/y/${M.year}/students">Students</a>`,`<span class="cur">${esc(M.yearCache.get(M.year).students[r.id]?.n||'Student')}</span>`);
+    if (r.name==='school' && M.yearCache.get(M.year)) parts.push(`<a data-h="#/y/${M.year}/schools">Schools</a>`,`<span class="cur">${esc(M.yearCache.get(M.year).schools[r.id]?.name||'School')}</span>`);
+    if (r.name==='subject' && M.yearCache.get(M.year)) parts.push(`<a data-h="#/y/${M.year}/subjects">Subjects</a>`,`<span class="cur">${esc(M.yearCache.get(M.year).subjects[r.id]?.name||'Subject')}</span>`);
+  }
+  c.innerHTML = parts.join('<span class="sep">›</span>');
+  $$('a[data-h]', c).forEach(a=>a.onclick=(e)=>{e.preventDefault();nav(a.dataset.h);});
+}
+function toggleYearMenu(e){
+  e && e.stopPropagation();
+  const menu = $('#year-menu'); if(!menu) return;
+  if (!menu.classList.contains('hide')) { menu.classList.add('hide'); return; }
+  menu.innerHTML = '<h4>Jump to a year — bar height = cohort size, gold = perfect 50s</h4>' + ridgeHTML(true);
+  menu.classList.remove('hide');
+  wireRidge(menu);
+  const close = (ev)=>{ if(!menu.contains(ev.target) && ev.target.id!=='year-btn'){ menu.classList.add('hide'); document.removeEventListener('click',close);} };
+  setTimeout(()=>document.addEventListener('click',close),0);
+}
+function ridgeHTML(compact){
+  const ys = M.manifest.years; const maxStu = Math.max(...ys.map(y=>y.students));
+  let cells=''; let prev=null;
+  for (const yy of ys) {
+    if (prev!=null && yy.y-prev>1) { // gap (1999)
+      cells += `<div class="col gap" title="No data ${prev+1}"><div class="bar-wrap"></div><div class="yr"></div></div>`;
+    }
+    const h = Math.max(3, yy.students/maxStu*100);
+    const goldH = yy.perfect/yy.students*100* (compact?3:3); // exaggerate cap
+    const active = M.year===yy.y ? ' active':'';
+    cells += `<div class="col${active}" data-year="${yy.y}"><div class="tip">${yy.y}: ${fmt(yy.students)} students · ${fmt(yy.perfect)} perfect 50s</div><div class="bar-wrap"><div class="bar" style="height:${h}%"><span class="cap" style="height:${Math.min(70,goldH)}%"></span></div></div><div class="yr">'${String(yy.y).slice(2)}</div></div>`;
+    prev = yy.y;
+  }
+  return '<div class="ridge">'+cells+'</div>';
+}
+function wireRidge(root){
+  $$('.ridge .col[data-year]', root).forEach(c=>{
+    c.onclick = ()=>{ const yy=parseInt(c.dataset.year,10); const keepView = (M.view && ['overview','students','schools','subjects','scaling','stats'].includes(M.view))?M.view:'overview'; $('#year-menu')?.classList.add('hide'); nav('#/y/'+yy+'/'+keepView); };
+    c.onmouseenter = ()=>prefetchYear(parseInt(c.dataset.year,10));
+  });
+}
+function updateOmniState(){
+  const lbl = $('#omni-label'); if(!lbl) return;
+  if (M.GIstate==='loading') lbl.innerHTML = 'Search students, schools, subjects <span class="indexing"><span class="dotpulse"></span>indexing 27 years…</span>';
+  else lbl.textContent = 'Search any student, school or subject…';
+}
+
+/* ============================================================ HOME */
+function renderHome(){
+  const t = M.manifest.totals;
+  const by = (k)=>M.manifest.years.slice().sort((a,b)=>b[k]-a[k])[0];
+  const recMost50 = by('perfect'), recCohort = by('students'), recSum = by('maxSum'), recScores=by('scores');
+  const app = $('#app');
+  app.innerHTML = `
+    <section class="hero">
+      <h1>27 years of VCE <span class="accent">study scores</span></h1>
+      <div class="lede">Every published score of 40 and above, from ${t.firstYear} to ${t.lastYear} — ${fmt(t.students)} students across ${fmt(t.yearCount)} years. Search a name, browse a school, or explore how any subject scales.</div>
+      <div class="hero-search"><span class="sicon">⌕</span><input id="home-search" type="search" placeholder="Search any student, school or subject…" autocomplete="off" /></div>
+      <div class="seed-row" id="seed-row"></div>
+      <div class="totals-strip">
+        <span><b>${fmt(t.students)}</b> students</span>
+        <span><b>${fmt(t.scores)}</b> scores of 40+</span>
+        <span><b>${fmt(t.perfect)}</b> perfect 50s</span>
+        <span><b>${fmt(t.yearCount)}</b> years</span>
+      </div>
+    </section>
+    <div class="home-ridge">${ridgeHTML(false)}</div>
+    <div class="section-title">Records across the archive</div>
+    <div class="records">
+      ${recordCard('Most perfect 50s', fmt(recMost50.perfect), recMost50.y)}
+      ${recordCard('Largest cohort (40+)', fmt(recCohort.students)+' students', recCohort.y)}
+      ${recordCard('Most 40+ scores', fmt(recScores.scores), recScores.y)}
+      ${recordCard('Highest single total', recSum.maxSum+' sum', recSum.y, '/students?sort=sum')}
+    </div>
+    <div class="section-title">Explore</div>
+    <div class="explore-cards">
+      ${eCard('Latest year — '+t.lastYear, 'Browse students, schools & subjects for '+t.lastYear, '#/y/'+t.lastYear)}
+      ${eCard('The scaling table', 'How raw scores 40–50 convert to scaled scores, per subject', '#/y/'+t.lastYear+'/scaling')}
+      ${eCard('All-time trends', 'Cohort size, perfect 50s and scaling across 27 years', '#/trends')}
+      ${eCard('Perfect scorers', 'Students with a 50 — filter any year', '#/y/'+t.lastYear+'/students?fifty=1')}
+    </div>`;
+  wireRidge(app);
+  $$('.record', app).forEach(c=>c.onclick=()=>nav(c.dataset.h));
+  $$('.ecard', app).forEach(c=>c.onclick=()=>nav(c.dataset.h));
+  const hs = $('#home-search');
+  hs.addEventListener('focus', ()=>{ ensureGlobalIndex(); openPalette(hs.value); });
+  hs.addEventListener('input', ()=>{ openPalette(hs.value); });
+  renderSeeds();
+  ensureGlobalIndex();
+}
+function recordCard(label, val, year, suffix){ return `<div class="record" data-h="#/y/${year}${suffix||''}"><div class="rl">${label}</div><div class="rv">${val}</div><div class="ry">${year} →</div></div>`; }
+function eCard(t,d,h){ return `<div class="ecard" data-h="${h}"><div class="et">${t}</div><div class="ed">${esc(d)}</div></div>`; }
+function renderSeeds(){
+  const seeds = [ {t:'Melbourne High School', q:'Melbourne High'}, {t:'Specialist Mathematics', q:'Specialist Mathematics'}, {t:'Try a surname →', q:'Nguyen'}, {t:'Scaling table', h:'#/y/'+M.manifest.totals.lastYear+'/scaling'} ];
+  $('#seed-row').innerHTML = seeds.map((s,i)=>`<span class="seed" data-i="${i}">${esc(s.t)}</span>`).join('');
+  $$('#seed-row .seed').forEach(sp=>{ const s=seeds[+sp.dataset.i]; sp.onclick=()=>{ if(s.h) nav(s.h); else { ensureGlobalIndex(); openPalette(s.q); } }; });
+}
+
+/* ============================================================ SEARCH / PALETTE */
+let PAL = { open:false, q:'', scope:'all', sel:0, results:null };
+function openPalette(initial){
+  if (!PAL.open) {
+    PAL.open = true; PAL.sel = 0;
+    const scrim = el('div','scrim'); scrim.id='pal-scrim';
+    scrim.innerHTML = `<div class="palette" role="dialog" aria-modal="true">
+      <div class="palette-top"><span class="sicon">⌕</span>
+        <input class="palette-input" id="pal-input" placeholder="Search students, schools, subjects…" aria-label="Search" autocomplete="off" />
+        <div class="scope-toggle"><button data-scope="all" class="on">All years</button><button data-scope="year">This year</button></div>
+      </div>
+      <div class="palette-body" id="pal-body"></div>
+      <div class="palette-foot"><span><span class="k">↑↓</span> navigate</span><span><span class="k">↵</span> open</span><span><span class="k">esc</span> close</span><span id="pal-status" style="margin-left:auto"></span></div>
+    </div>`;
+    document.body.appendChild(scrim);
+    scrim.addEventListener('click', e=>{ if(e.target===scrim) closePalette(); });
+    const input = $('#pal-input');
+    input.addEventListener('input', debounce(()=>{ PAL.q=input.value; PAL.sel=0; runSearch(); }, 110));
+    input.addEventListener('keydown', paletteKeys);
+    $$('.scope-toggle button', scrim).forEach(b=>b.onclick=()=>{ PAL.scope=b.dataset.scope; $$('.scope-toggle button',scrim).forEach(x=>x.classList.toggle('on',x===b)); input.focus(); runSearch(); });
+    // scope 'year' only meaningful if a year is active
+    if (!['year','student','school','subject'].includes(M.route.name)) $('.scope-toggle button[data-scope="year"]').style.display='none';
+  }
+  const input = $('#pal-input');
+  if (initial!=null) { input.value=initial; PAL.q=initial; }
+  input.focus(); input.select();
+  ensureGlobalIndex().then(()=>{ if(PAL.open) runSearch(); });
+  runSearch();
+}
+function closePalette(){ PAL.open=false; const s=$('#pal-scrim'); if(s) s.remove(); }
+function paletteKeys(e){
+  const flat = PAL.flat||[];
+  if (e.key==='ArrowDown'){ e.preventDefault(); PAL.sel=Math.min(flat.length-1,PAL.sel+1); paintSel(); }
+  else if (e.key==='ArrowUp'){ e.preventDefault(); PAL.sel=Math.max(0,PAL.sel-1); paintSel(); }
+  else if (e.key==='Enter'){ e.preventDefault(); const it=flat[PAL.sel]; if(it) openResult(it); }
+  else if (e.key==='Escape'){ e.preventDefault(); closePalette(); }
+}
+function paintSel(){ $$('.presult').forEach((r,i)=>r.classList.toggle('sel', i===PAL.sel)); const s=$$('.presult')[PAL.sel]; if(s) s.scrollIntoView({block:'nearest'}); }
+
+function runSearch(){
+  const body = $('#pal-body'); if(!body) return;
+  const q = PAL.q.trim();
+  if (!q) { body.innerHTML = paletteEmpty(); PAL.flat=[]; return; }
+  const res = search(q, PAL.scope);
+  PAL.results = res;
+  PAL.flat = [...res.students.map(x=>({type:'student',...x})), ...res.schools.map(x=>({type:'school',...x})), ...res.subjects.map(x=>({type:'subject',...x}))];
+  let html = '';
+  if (res.schools.length) html += groupHTML('Schools', res.schools.map(s=>schoolRow(s,q)));
+  if (res.subjects.length) html += groupHTML('Subjects', res.subjects.map(s=>subjectRow(s,q)));
+  if (res.students.length) html += groupHTML('Students'+(M.GIstate!=='ready'?' (indexing…)':''), res.students.map(s=>studentRow(s,q)), res.studentTotal);
+  if (!html) html = `<div class="palette-empty">No matches for “${esc(q)}”.${M.GIstate!=='ready'?'<br><span class="indexing"><span class="dotpulse"></span>still indexing student names…</span>':''}</div>`;
+  body.innerHTML = html;
+  // reorder flat to match DOM order (schools, subjects, students)
+  PAL.flat = [...res.schools.map(x=>({type:'school',...x})), ...res.subjects.map(x=>({type:'subject',...x})), ...res.students.map(x=>({type:'student',...x}))];
+  $$('.presult', body).forEach((r,i)=>{ r.onclick=()=>openResult(PAL.flat[i]); r.onmouseenter=()=>{ PAL.sel=i; paintSel(); }; });
+  const st=$('#pal-status'); if(st) st.textContent = (res.schools.length+res.subjects.length+(res.studentTotal||res.students.length))+' matches';
+  paintSel();
+}
+function paletteEmpty(){
+  return `<div class="pgroup-h"><span>Jump to</span></div>` +
+    ['Latest year overview|#/y/'+M.manifest.totals.lastYear, 'Scaling table|#/y/'+M.manifest.totals.lastYear+'/scaling', 'All-time trends|#/trends']
+    .map(s=>{ const [t,h]=s.split('|'); return `<div class="presult" data-h="${h}"><div class="pmain"><div class="pname">${t}</div></div></div>`; }).join('') +
+    `<div class="palette-empty">Type a student name, school or subject to search all 27 years.</div>`;
+}
+function groupHTML(title, rows, total){
+  const extra = total && total>rows.length ? `<span>${fmt(rows.length)} of ${fmt(total)}</span>` : '';
+  return `<div class="pgroup-h"><span>${title}</span>${extra}</div>` + rows.join('');
+}
+function studentRow(s, q){
+  const school = M.GI.schools[s.sc];
+  const star = s.top>=50 ? `<span class="pill gold">★50</span>` : '';
+  return `<div class="presult"><div class="pmain"><div class="pname">${nameHTML(s.name,q)}</div><div class="psub">${esc(school)}</div></div><div class="pmeta">${star}<span class="pill">${s.c}·Σ${s.s}</span><span class="pill yr">${s.y}</span></div></div>`;
+}
+function schoolRow(s, q){ return `<div class="presult"><div class="pmain"><div class="pname">${highlight(s.name,q)}</div><div class="psub">School · appears in ${s.years} year${s.years===1?'':'s'}</div></div><div class="pmeta"><span class="pill accent">School</span></div></div>`; }
+function subjectRow(s, q){ return `<div class="presult"><div class="pmain"><div class="pname">${highlight(s.name,q)}</div><div class="psub">Subject · ${s.years.length} years${s.scaleTag?' · '+s.scaleTag:''}</div></div><div class="pmeta"><span class="pill">Subject</span></div></div>`; }
+function nameHTML(name, q){ const i=name.indexOf(', '); if(i<0) return highlight(name,q); return `<span class="sur">${highlight(name.slice(0,i),q)}</span>${highlight(name.slice(i),q)}`; }
+
+function openResult(it){
+  if (!it) return;
+  closePalette();
+  if (it.type==='student') nav('#/y/'+it.y+'/student/'+it.i);
+  else if (it.type==='school') nav('#/school/'+slug(it.name));
+  else if (it.type==='subject') nav('#/subject/'+slug(it.name));
+  else if (it.h) nav(it.h);
+}
+
+function search(q, scope){
+  const ql = q.toLowerCase().trim();
+  const toks = ql.split(/\s+/).filter(Boolean);
+  // ----- students -----
+  let students = [], studentTotal = 0;
+  if (M.GIstate==='ready' && M.GI) {
+    const years = (scope==='year' && M.year) ? [String(M.year)] : Object.keys(M.searchLower);
+    const hits = [];
+    outer:
+    for (const y of years) {
+      const lower = M.searchLower[y]; const b = M.GI.byYear[y];
+      for (let i=0;i<lower.length;i++){
+        const nm = lower[i]; let ok=true;
+        for (const t of toks){ if(nm.indexOf(t)<0){ok=false;break;} }
+        if (ok) {
+          // tier: surname prefix (0) > given prefix (1) > substring (2)
+          const t0 = toks[0]; let tier=2;
+          if (nm.startsWith(t0)) tier=0; else { const ci=nm.indexOf(', '); if(ci>=0 && nm.slice(ci+2).startsWith(t0)) tier=1; }
+          hits.push({ y:+y, i, name:b.namesArr[i], sc:b.sc[i], c:b.c[i], s:b.s[i], top:b.top[i], tier });
+          if (hits.length>6000) break outer;
+        }
+      }
+    }
+    studentTotal = hits.length;
+    hits.sort((a,b)=> a.tier-b.tier || b.s-a.s || b.top-a.top || b.y-a.y);
+    students = hits.slice(0, 40);
+  }
+  // ----- schools -----
+  let schools = [];
+  if (M.GI && M.GI.schools) {
+    const counts = M._schoolYearCount || (M._schoolYearCount = computeSchoolYearCounts());
+    schools = M.GI.schools.map((name,idx)=>({name,idx})).filter(s=>s.name.toLowerCase().includes(ql))
+      .map(s=>({ name:s.name, years: counts[s.idx]||0 }))
+      .sort((a,b)=> startRank(a.name,ql)-startRank(b.name,ql) || b.years-a.years || a.name.localeCompare(b.name))
+      .slice(0,8);
+  } else if (!M.GI) {
+    schools = []; // not loaded yet
+  }
+  // ----- subjects -----
+  let subjects = [];
+  if (M.subjectDict) {
+    subjects = [...M.subjectDict.entries()].filter(([name])=>name.toLowerCase().includes(ql))
+      .map(([name,years])=>({name, years}))
+      .sort((a,b)=> startRank(a.name,ql)-startRank(b.name,ql) || b.years.length-a.years.length || a.name.localeCompare(b.name))
+      .slice(0,8);
+    // scale tag from scaling-all if loaded
+    if (M.SCALING) subjects.forEach(s=>{ const st=scaleTagFor(s.name); if(st) s.scaleTag=st; });
+  }
+  return { students, studentTotal, schools, subjects };
+}
+function startRank(name, ql){ const n=name.toLowerCase(); return n.startsWith(ql)?0: n.indexOf(' '+ql)>=0?1:2; }
+function computeSchoolYearCounts(){
+  const counts = {};
+  if(!M.GI) return counts;
+  for (const y of Object.keys(M.GI.byYear)) { const present=new Set(M.GI.byYear[y].sc); for(const idx of present) counts[idx]=(counts[idx]||0)+1; }
+  return counts;
+}
+function scaleTagFor(name){
+  if(!M.SCALING) return null;
+  const ly = M.manifest.totals.lastYear;
+  for (let y=ly; y>=M.manifest.totals.firstYear; y--){ const row=M.SCALING[y] && M.SCALING[y][name]; if(row){ const at50=row[10]; if(at50>50) return 'scales past 50'; const at40=row[0]; return at40<40?('40→'+at40.toFixed(0)+' (down)'):('scales up'); } }
+  return null;
+}
+
+/* ============================================================ (views continue in part 2) */
+</script>
+<script src="app-views.js"></script>
+<script>
+/* ============================================================ Global keys, theme, init */
+document.addEventListener('keydown', (e)=>{
+  if ((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); ensureGlobalIndex(); openPalette($('#pal-input')?$('#pal-input').value:''); return; }
+  if (e.key==='/' && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName) && !PAL.open){ e.preventDefault(); ensureGlobalIndex(); openPalette(''); return; }
+  if (PAL.open) return;
+  if (e.key==='?'){ showHelp(); return; }
+  const hasYear = ['year','student','school','subject'].includes(M.route?.name);
+  if (hasYear && (e.key==='['||e.key===']')){ const i=YEARS.indexOf(M.year); const ni=e.key==='['?i-1:i+1; if(ni>=0&&ni<YEARS.length){ const v=(M.view&&VIEWS.some(x=>x[0]===M.view))?M.view:'overview'; nav('#/y/'+YEARS[ni]+'/'+v); } }
+  if (hasYear && /^[1-6]$/.test(e.key)){ nav('#/y/'+M.year+'/'+VIEWS[+e.key-1][0]); }
+  if (e.key.toLowerCase()==='g'){ M._g=true; setTimeout(()=>M._g=false,600); }
+  if (M._g && e.key.toLowerCase()==='h'){ nav('#/'); }
+});
+$('#brand').onclick = ()=>nav('#/');
+$('#omni-btn').onclick = ()=>{ ensureGlobalIndex(); openPalette(''); };
+$('#help-btn').onclick = showHelp;
+$('#theme-btn').onclick = ()=>{
+  const cur = document.documentElement.getAttribute('data-theme');
+  const sysDark = matchMedia('(prefers-color-scheme: dark)').matches;
+  let next; if(!cur) next = sysDark?'light':'dark'; else if(cur==='dark') next='light'; else next='dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try{ localStorage.setItem('ss-theme', next); }catch(e){}
+};
+function showHelp(){
+  toast('Shortcuts: Ctrl-K search · [ ] change year · 1–6 switch view · g h home', 4200);
+}
+(function initTheme(){ try{ const t=localStorage.getItem('ss-theme'); if(t) document.documentElement.setAttribute('data-theme',t);}catch(e){} })();
+
+window.addEventListener('hashchange', route);
+(async function init(){
+  try {
+    await loadManifest();
+    route();
+    // background-load the global search index after first paint
+    setTimeout(()=>ensureGlobalIndex(), 400);
+    setTimeout(()=>loadScalingAll(), 900);
+    prefetchYear(M.manifest.totals.lastYear);
+  } catch(e){
+    $('#app').innerHTML = '<div class="empty">Failed to load data. Serve this folder over HTTP (e.g. <code>node server.js</code>) and reload.<br><small>'+esc(e.message)+'</small></div>';
+  }
+})();
+</script>
+</body>
+</html>

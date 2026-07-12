@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VCE Study Scores 2024 — School Explorer</title>
+<style>
+  :root {
+    --bg: #0c0f15;
+    --bg-2: #0f131b;
+    --panel: #161a23;
+    --panel-2: #1c2130;
+    --panel-3: #242a3b;
+    --border: #262c3a;
+    --border-2: #353b4c;
+    --text: #e7ebf3;
+    --text-2: #c1c7d3;
+    --muted: #8089a0;
+    --muted-2: #5e677c;
+    --accent: #5aa9ff;
+    --accent-dim: rgba(90,169,255,0.16);
+    --good: #5cd28f;
+    --good-dim: rgba(92,210,143,0.18);
+    --gold: #ffd166;
+    --gold-dim: rgba(255,209,102,0.18);
+    --warn: #ff9966;
+    --warn-dim: rgba(255,153,102,0.18);
+    --bad: #ff6b6b;
+    --bar: linear-gradient(90deg, #5aa9ff, #5cd28f);
+    --bar-gold: linear-gradient(90deg, #ffd166, #ff9966);
+    --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.25);
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f5f7fb;
+      --bg-2: #ffffff;
+      --panel: #ffffff;
+      --panel-2: #f1f4fa;
+      --panel-3: #e6ebf4;
+      --border: #e4e8f1;
+      --border-2: #cdd5e3;
+      --text: #161b27;
+      --text-2: #2c3344;
+      --muted: #58617a;
+      --muted-2: #8088a0;
+      --accent: #1c66e8;
+      --accent-dim: rgba(28,102,232,0.10);
+      --good: #1a9b56;
+      --good-dim: rgba(26,155,86,0.12);
+      --gold: #a37100;
+      --gold-dim: rgba(163,113,0,0.10);
+      --warn: #c95a25;
+      --warn-dim: rgba(201,90,37,0.12);
+      --bad: #d33a3a;
+      --shadow: 0 1px 2px rgba(20,30,60,0.06), 0 8px 24px rgba(20,30,60,0.06);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  button { font-family: inherit; }
+
+  header {
+    padding: 22px 24px 6px;
+    max-width: 1320px;
+    margin: 0 auto;
+  }
+  h1 {
+    margin: 0 0 2px;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+    font-weight: 650;
+  }
+  h1 .accent { color: var(--accent); }
+  .sub { color: var(--muted); font-size: 12.5px; }
+  .sub a { color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
+
+  main {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 8px;
+    margin: 12px 0 16px;
+  }
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 13px;
+  }
+  .stat .v { font-size: 19px; font-weight: 600; line-height: 1.2; font-variant-numeric: tabular-nums; }
+  .stat .l { color: var(--muted); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.07em; margin-top: 1px; }
+
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 14px;
+  }
+  .tab {
+    background: transparent;
+    color: var(--muted);
+    border: none;
+    padding: 9px 18px;
+    font-size: 13.5px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    font-weight: 500;
+  }
+  .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+  .tab:hover { color: var(--text); }
+
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+    align-items: center;
+  }
+  input[type=search], input[type=text], select {
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font: inherit;
+    min-width: 200px;
+    transition: border-color 0.15s;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--accent); }
+  ::placeholder { color: var(--muted-2); }
+  .count { color: var(--muted); font-size: 12.5px; margin-left: auto; }
+
+  .lens-active {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--text);
+  }
+  .clear-x {
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0 8px;
+    border-left: 1px solid var(--border);
+    margin-left: 2px;
+  }
+  .clear-x:hover { color: var(--bad); }
+  .lens-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0 0 0 10px;
+    min-width: 240px;
+    gap: 4px;
+  }
+  .lens-wrap.active { background: var(--accent-dim); border-color: var(--accent); }
+  .lens-wrap .lens-label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .lens-wrap input { border: none; background: transparent; padding: 8px 6px; min-width: 0; flex: 1; }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th, td {
+    text-align: left;
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  th {
+    background: var(--panel-2);
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    user-select: none;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  tbody tr:hover { background: var(--panel-2); }
+  tbody tr.expandable { cursor: pointer; transition: background 0.1s; }
+  tbody tr.open { background: var(--panel-2); }
+  tbody tr.open td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .rank { color: var(--muted); width: 50px; font-variant-numeric: tabular-nums; }
+  .rank-1, .rank-2, .rank-3 { color: var(--gold); font-weight: 600; }
+
+  .pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    font-size: 11.5px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.5;
+  }
+  .pill.gold { color: var(--gold); border-color: var(--gold); background: var(--gold-dim); }
+  .pill.good { color: var(--good); border-color: var(--good); background: var(--good-dim); }
+  .pill.accent { color: var(--accent); border-color: var(--accent); background: var(--accent-dim); }
+  .pill.warn { color: var(--warn); border-color: var(--warn); background: var(--warn-dim); }
+
+  /* Sparkline */
+  .spark {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 1px;
+    height: 22px;
+    vertical-align: middle;
+    margin-left: 8px;
+  }
+  .spark .b {
+    width: 4px;
+    background: var(--muted-2);
+    border-radius: 1px 1px 0 0;
+    opacity: 0.55;
+  }
+  .spark .b.hot { background: var(--gold); opacity: 0.95; }
+  .spark .b.warm { background: var(--accent); opacity: 0.7; }
+
+  .school-cell { display: flex; align-items: center; gap: 4px; min-height: 28px; }
+  .school-name-text { font-weight: 500; }
+  .school-cell .spark { margin-left: auto; }
+
+  /* Detail */
+  .detail-row > td {
+    background: var(--bg-2);
+    padding: 20px 22px 22px;
+    border-bottom: 2px solid var(--accent);
+    border-top: 1px solid var(--border-2);
+  }
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 22px;
+  }
+  @media (max-width: 980px) { .detail-grid { grid-template-columns: 1fr; } }
+
+  .detail-head {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .detail-head h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .detail-head .rank-pills { display: flex; flex-wrap: wrap; gap: 5px; }
+
+  .stat-tiles {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .stat-tile {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 12px;
+  }
+  .stat-tile .l { color: var(--muted); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .stat-tile .v { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .stat-tile .meta { color: var(--muted); font-size: 11px; margin-top: 2px; font-variant-numeric: tabular-nums; }
+
+  .section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+    font-weight: 600;
+    margin: 0 0 8px;
+  }
+  .histogram {
+    display: grid;
+    grid-template-columns: 26px 1fr 36px;
+    gap: 8px;
+    align-items: center;
+    margin: 3px 0;
+    font-size: 12px;
+  }
+  .histogram .score { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .histogram .bar-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; height: 12px; }
+  .histogram .bar { height: 100%; border-radius: 4px; transition: width 0.3s; }
+  .histogram .num { text-align: right; color: var(--text-2); font-variant-numeric: tabular-nums; }
+
+  .mini-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .mini-table th, .mini-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .mini-table th {
+    background: var(--panel-2);
+    color: var(--muted);
+    text-transform: none;
+    font-size: 11px;
+    letter-spacing: 0;
+    position: static;
+    font-weight: 600;
+  }
+  .mini-table tbody tr:last-child td { border-bottom: none; }
+  .mini-table tbody tr:hover { background: var(--panel-2); }
+  .mini-table .linkish { cursor: pointer; color: var(--text); }
+  .mini-table .linkish:hover { color: var(--accent); }
+
+  /* Strength bar (centered diff vs state) */
+  .strength {
+    display: grid;
+    grid-template-columns: 1fr 36px;
+    gap: 6px;
+    align-items: center;
+    min-width: 110px;
+  }
+  .strength .track {
+    position: relative;
+    height: 8px;
+    background: var(--panel-3);
+    border-radius: 4px;
+  }
+  .strength .mid {
+    position: absolute;
+    left: 50%;
+    top: -2px;
+    bottom: -2px;
+    width: 1px;
+    background: var(--border-2);
+  }
+  .strength .fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-radius: 4px;
+  }
+  .strength .fill.pos { background: var(--good); left: 50%; }
+  .strength .fill.neg { background: var(--warn); right: 50%; }
+  .strength .v { color: var(--text-2); font-size: 11.5px; font-variant-numeric: tabular-nums; text-align: right; }
+  .strength .v.pos { color: var(--good); }
+  .strength .v.neg { color: var(--warn); }
+
+  .subj-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+  .chip-sm {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 2px 9px;
+    font-size: 11.5px;
+    color: var(--text-2);
+  }
+  .chip-sm b {
+    font-weight: 600;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .chip-sm.perfect b { color: var(--gold); }
+
+  .empty { padding: 36px; text-align: center; color: var(--muted); }
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 14px 0;
+    color: var(--muted);
+    font-size: 12.5px;
+  }
+  .pagination button {
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 14px;
+    cursor: pointer;
+  }
+  .pagination button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .pagination button:disabled { opacity: 0.35; cursor: not-allowed; }
+  mark { background: var(--gold-dim); color: inherit; padding: 0 2px; border-radius: 2px; }
+  .hide { display: none !important; }
+
+  .active-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .filter-chip {
+    background: var(--accent-dim);
+    color: var(--text);
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    padding: 3px 4px 3px 12px;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .filter-chip .x {
+    background: transparent;
+    color: var(--muted);
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 6px;
+    line-height: 1;
+  }
+  .filter-chip .x:hover { color: var(--bad); }
+
+  .actions-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .btn {
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 12px;
+    cursor: pointer;
+    font-size: 12.5px;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .btn.primary:hover { color: white; opacity: 0.9; }
+
+  .mini-tabs {
+    display: inline-flex;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2px;
+    gap: 2px;
+    margin-bottom: 10px;
+  }
+  .mini-tabs button {
+    background: transparent;
+    color: var(--muted);
+    border: none;
+    border-radius: 6px;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .mini-tabs button.active { background: var(--panel-3); color: var(--text); }
+
+  @media (max-width: 720px) {
+    th, td { padding: 7px 8px; font-size: 12.5px; }
+    h1 { font-size: 18px; }
+    input[type=search], input[type=text], select { min-width: 0; flex: 1 1 140px; }
+    .lens-wrap { min-width: 0; flex: 1 1 100%; }
+    .stat .v { font-size: 17px; }
+    .stat-tiles { grid-template-columns: 1fr; }
+    .col-mobile-hide { display: none; }
+    main { padding: 0 14px 60px; }
+    header { padding: 18px 14px 4px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>VCE Study Scores <span class="accent">2024</span></h1>
+  <div class="sub">A clearer view of the public score data. Source: <a href="https://www.quppa.net/studyscores/" target="_blank" rel="noopener">quppa.net/studyscores</a>. Only scores ≥ 40 are published.</div>
+</header>
+<main>
+  <section class="stats" id="stats"></section>
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-tab="schools">Schools</button>
+    <button class="tab" data-tab="students">Students</button>
+  </div>
+
+  <section id="tab-schools">
+    <div class="toolbar">
+      <input type="search" id="school-search" placeholder="Search schools…" />
+      <div class="lens-wrap" id="lens-wrap">
+        <span class="lens-label">Subject lens</span>
+        <input type="text" id="lens-input" list="subjects-datalist" placeholder="(none)" autocomplete="off" />
+        <span class="clear-x hide" id="lens-clear">×</span>
+      </div>
+      <select id="school-sort"></select>
+      <select id="school-min">
+        <option value="0">All schools</option>
+        <option value="5">≥5 top students</option>
+        <option value="10">≥10 top students</option>
+        <option value="25">≥25 top students</option>
+        <option value="50">≥50 top students</option>
+      </select>
+      <span class="count" id="school-count"></span>
+    </div>
+    <datalist id="subjects-datalist"></datalist>
+    <div class="panel">
+      <table id="school-table">
+        <thead id="school-thead"></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty hide" id="school-empty">No schools match.</div>
+    </div>
+  </section>
+
+  <section id="tab-students" class="hide">
+    <div class="active-filters" id="student-active-filters"></div>
+    <div class="toolbar">
+      <input type="search" id="student-search" placeholder="Search name or school…" />
+      <select id="student-subject">
+        <option value="">Any subject</option>
+      </select>
+      <select id="student-sort">
+        <option value="sum">Sort: Highest sum</option>
+        <option value="count">Sort: Most 40+ scores</option>
+        <option value="max">Sort: Top single score</option>
+        <option value="name">Sort: Name A–Z</option>
+      </select>
+      <select id="student-min">
+        <option value="0">Any 40+ count</option>
+        <option value="3">3+ scores ≥ 40</option>
+        <option value="4">4+ scores ≥ 40</option>
+        <option value="5">5+ scores ≥ 40</option>
+        <option value="6">6+ scores ≥ 40</option>
+      </select>
+      <span class="count" id="student-count"></span>
+    </div>
+    <div class="panel">
+      <table id="student-table">
+        <thead><tr>
+          <th class="rank">#</th>
+          <th>Student</th>
+          <th>School</th>
+          <th class="num">40+</th>
+          <th class="num">Sum</th>
+          <th class="num">Top</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="empty hide" id="student-empty">No students match.</div>
+    </div>
+    <div class="pagination" id="student-pagination"></div>
+  </section>
+</main>
+
+<script>
+const state = {
+  data: null,
+  tab: 'schools',
+  // Schools
+  schoolSearch: '',
+  schoolSort: 'perfect',
+  schoolMin: 0,
+  lensSubject: null, // subject id or null
+  // Students
+  studentSearch: '',
+  studentSort: 'sum',
+  studentMin: 0,
+  studentSchoolFilter: null,
+  studentSubjectFilter: null,
+  studentPage: 0,
+  studentPageSize: 100,
+  // Expand state
+  expandedSchool: null,
+  expandedStudent: null,
+};
+
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+const escapeHtml = (s) => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function highlight(text, query) {
+  const safe = escapeHtml(text);
+  const q = (query || '').trim();
+  if (!q) return safe;
+  const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig');
+  return safe.replace(re, '<mark>$1</mark>');
+}
+
+function ordinal(n) {
+  const s = ['th','st','nd','rd'], v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+function pctOf(n, total) {
+  if (!total) return 0;
+  return (n / total) * 100;
+}
+
+async function load() {
+  try {
+    const res = await fetch('data.json');
+    state.data = await res.json();
+    init();
+  } catch (e) {
+    $('main').innerHTML = '<div class="empty">Failed to load data.json. Serve this folder via a local HTTP server (e.g. <code>python -m http.server</code>).</div>';
+  }
+}
+
+function renderStats() {
+  const d = state.data;
+  const totalStudents = d.students.length;
+  const totalScores = d.schools.reduce((a, s) => a + s.total, 0);
+  const totalPerfect = d.schools.reduce((a, s) => a + (s.counts['50'] || 0), 0);
+  const tiles = [
+    ['Top students', totalStudents.toLocaleString()],
+    ['Schools', d.schools.length.toLocaleString()],
+    ['Subjects', d.subjects.length.toLocaleString()],
+    ['Scores ≥ 40', totalScores.toLocaleString()],
+    ['Perfect 50s', totalPerfect.toLocaleString()],
+  ];
+  $('#stats').innerHTML = tiles.map(([l, v]) => `<div class="stat"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
+}
+
+function sparklineHTML(counts) {
+  const values = [];
+  let max = 0;
+  for (let sc = 40; sc <= 50; sc++) {
+    const c = counts[sc] || 0;
+    values.push([sc, c]);
+    if (c > max) max = c;
+  }
+  if (!max) return '';
+  return `<span class="spark" title="Distribution 40 → 50">` + values.map(([sc, c]) => {
+    const h = Math.max(2, (c / max) * 22);
+    const cls = sc >= 48 ? 'b hot' : sc >= 45 ? 'b warm' : 'b';
+    return `<span class="${cls}" style="height:${h}px" title="${sc}: ${c}"></span>`;
+  }).join('') + `</span>`;
+}
+
+function rankBadge(rank, total, label) {
+  const cls = rank === 1 ? 'gold' : rank <= 3 ? 'good' : rank <= 10 ? 'accent' : '';
+  return `<span class="pill ${cls}" title="${label}: rank ${rank} of ${total}">${label} #${rank}</span>`;
+}
+
+// ---- Schools tab rendering ----
+const SORT_OPTIONS_DEFAULT = [
+  ['perfect', 'Most 50s'],
+  ['total', 'Most 40+ scores'],
+  ['students', 'Most top students'],
+  ['rate', '50s as % of 40+'],
+  ['avg', 'Avg sum (per top student)'],
+  ['name', 'A–Z'],
+];
+const SORT_OPTIONS_LENS = [
+  ['lens-p', 'Most 50s in subject'],
+  ['lens-n', 'Most 40+ in subject'],
+  ['lens-avg', 'Highest avg in subject'],
+  ['lens-strength', 'Strongest vs state'],
+  ['name', 'A–Z'],
+];
+
+function rebuildSortOptions() {
+  const opts = state.lensSubject !== null ? SORT_OPTIONS_LENS : SORT_OPTIONS_DEFAULT;
+  const cur = state.schoolSort;
+  $('#school-sort').innerHTML = opts.map(([v, l]) => `<option value="${v}">Sort: ${l}</option>`).join('');
+  const valid = opts.find(o => o[0] === cur);
+  if (!valid) state.schoolSort = opts[0][0];
+  $('#school-sort').value = state.schoolSort;
+}
+
+function rebuildHead() {
+  let cols;
+  if (state.lensSubject !== null) {
+    const sjName = state.data.subjects[state.lensSubject].name;
+    cols = [
+      ['rank', '#'],
+      ['', 'School'],
+      ['num', '40+'],
+      ['num', '50s'],
+      ['num', 'Avg'],
+      ['', 'vs State'],
+      ['num col-mobile-hide', 'Subj rank'],
+    ];
+  } else {
+    cols = [
+      ['rank', '#'],
+      ['', 'School'],
+      ['num', '40+'],
+      ['num', '50s'],
+      ['num', 'Top students'],
+      ['num col-mobile-hide', '50 rate'],
+      ['num col-mobile-hide', 'Avg sum'],
+    ];
+  }
+  $('#school-thead').innerHTML = '<tr>' + cols.map(([cls, label]) =>
+    `<th class="${cls}">${label}</th>`).join('') + '</tr>';
+  return cols.length;
+}
+
+function getLensEntry(school, sjid) {
+  return school.subjectsList.find(x => x.sjid === sjid);
+}
+
+function renderSchools() {
+  const d = state.data;
+  const q = state.schoolSearch.toLowerCase().trim();
+  const lens = state.lensSubject;
+  const colCount = rebuildHead();
+
+  let list = d.schools.slice();
+  if (q) list = list.filter(s => s.name.toLowerCase().includes(q));
+  if (state.schoolMin > 0) list = list.filter(s => s.students >= state.schoolMin);
+  if (lens !== null) list = list.filter(s => getLensEntry(s, lens));
+
+  const sort = state.schoolSort;
+  const stateAvg = lens !== null ? d.subjects[lens].avg : 0;
+  list.sort((a, b) => {
+    if (sort === 'name') return a.name.localeCompare(b.name);
+    if (lens !== null) {
+      const ea = getLensEntry(a, lens), eb = getLensEntry(b, lens);
+      if (sort === 'lens-n') return eb.n - ea.n || eb.p - ea.p;
+      if (sort === 'lens-avg') return eb.avg - ea.avg || eb.p - ea.p;
+      if (sort === 'lens-strength') return (eb.avg - stateAvg) - (ea.avg - stateAvg);
+      return eb.p - ea.p || eb.n - ea.n || eb.avg - ea.avg;
+    }
+    if (sort === 'rate') return (b.perfect / Math.max(b.total, 1)) - (a.perfect / Math.max(a.total, 1));
+    if (sort === 'students') return b.students - a.students;
+    if (sort === 'total') return b.total - a.total;
+    if (sort === 'avg') return b.avgScore - a.avgScore;
+    return b.perfect - a.perfect || b.total - a.total;
+  });
+
+  $('#school-count').textContent = `${list.length.toLocaleString()} school${list.length === 1 ? '' : 's'}`;
+  const tbody = $('#school-table tbody');
+  if (!list.length) { tbody.innerHTML = ''; $('#school-empty').classList.remove('hide'); return; }
+  $('#school-empty').classList.add('hide');
+
+  const rows = list.map((s, i) => {
+    const open = state.expandedSchool === s.id;
+    const rankCls = i + 1 <= 3 ? `rank rank-${i+1}` : 'rank';
+    let main;
+    if (lens !== null) {
+      const e = getLensEntry(s, lens);
+      const diff = e.avg - stateAvg;
+      main = `
+        <td class="${rankCls}">${i + 1}</td>
+        <td><div class="school-cell"><span class="school-name-text">${highlight(s.name, q)}</span></div></td>
+        <td class="num">${e.n}</td>
+        <td class="num">${e.p ? `<span class="pill gold">${e.p}</span>` : '0'}</td>
+        <td class="num">${e.avg.toFixed(1)}</td>
+        <td>${strengthBar(diff)}</td>
+        <td class="num col-mobile-hide"><span class="pill ${e.r === 1 ? 'gold' : e.r <= 3 ? 'good' : ''}">${e.r}/${d.subjects[lens].numSchools}</span></td>
+      `;
+    } else {
+      const rate = pctOf(s.perfect, s.total).toFixed(1);
+      main = `
+        <td class="${rankCls}">${i + 1}</td>
+        <td><div class="school-cell"><span class="school-name-text">${highlight(s.name, q)}</span>${sparklineHTML(s.counts)}</div></td>
+        <td class="num">${s.total.toLocaleString()}</td>
+        <td class="num">${s.perfect ? `<span class="pill gold">${s.perfect}</span>` : '0'}</td>
+        <td class="num">${s.students}</td>
+        <td class="num col-mobile-hide">${rate}%</td>
+        <td class="num col-mobile-hide">${s.avgScore || '–'}</td>
+      `;
+    }
+    const detail = open ? `<tr class="detail-row"><td colspan="${colCount}">${schoolDetail(s)}</td></tr>` : '';
+    return `<tr class="expandable${open ? ' open' : ''}" data-school="${s.id}">${main}</tr>${detail}`;
+  }).join('');
+  tbody.innerHTML = rows;
+
+  $$('#school-table tr.expandable').forEach(tr => {
+    tr.addEventListener('click', () => {
+      const id = parseInt(tr.dataset.school, 10);
+      state.expandedSchool = state.expandedSchool === id ? null : id;
+      renderSchools();
+      if (state.expandedSchool !== null) setTimeout(() => {
+        const open = $('#school-table tr.open');
+        if (open) open.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+      }, 30);
+    });
+  });
+  attachDetailLinks($('#school-table'));
+}
+
+function strengthBar(diff) {
+  const cap = 5;
+  const pct = Math.min(Math.abs(diff), cap) / cap * 50; // 0-50 of half
+  const sign = diff >= 0 ? 'pos' : 'neg';
+  const label = (diff >= 0 ? '+' : '') + diff.toFixed(1);
+  return `<div class="strength" title="School avg vs state avg (capped at ±${cap})">
+    <div class="track">
+      <div class="fill ${sign}" style="width:${pct}%"></div>
+      <div class="mid"></div>
+    </div>
+    <span class="v ${sign}">${label}</span>
+  </div>`;
+}
+
+function schoolDetail(s) {
+  const d = state.data;
+  const total = d.totalSchools;
+  const ranks = s.ranks;
+  const ratePct = pctOf(s.perfect, s.total).toFixed(1);
+  const stateTotal = d.schools.reduce((a, x) => a + x.total, 0);
+  const sharePct = pctOf(s.total, stateTotal).toFixed(2);
+  const subjectsCovered = s.subjectsList.length;
+  const top1Count = s.subjectsList.filter(x => x.r === 1).length;
+  const top5Count = s.subjectsList.filter(x => x.r <= 5).length;
+
+  const rankPills = [
+    rankBadge(ranks.perfect, total, '50s'),
+    rankBadge(ranks.total, total, '40+'),
+    rankBadge(ranks.students, total, 'Top students'),
+    rankBadge(ranks.rate, total, '50 rate'),
+    rankBadge(ranks.avg, total, 'Avg sum'),
+  ].join(' ');
+
+  const headHtml = `<div class="detail-head">
+    <h2>${escapeHtml(s.name)}</h2>
+    <div class="rank-pills">${rankPills}</div>
+  </div>`;
+
+  const tiles = [
+    ['Scores ≥ 40', s.total.toLocaleString(), `${sharePct}% of state`],
+    ['Perfect 50s', String(s.perfect), `${ratePct}% of 40+ scores`],
+    ['Top students', String(s.students), `Avg sum ${s.avgScore || '–'}`],
+    ['Subjects covered', String(subjectsCovered), `${top1Count} ranked #1 · ${top5Count} in top 5`],
+  ];
+  const tilesHtml = tiles.map(([l, v, m]) =>
+    `<div class="stat-tile"><div class="l">${l}</div><div class="v">${v}</div><div class="meta">${m}</div></div>`
+  ).join('');
+
+  // Histogram
+  const histHtml = histogramHTML(s.counts, s.total);
+
+  // Subject strengths sorted by user choice
+  const subjRows = s.subjectsList.map(x => {
+    const sj = d.subjects[x.sjid];
+    const diff = x.avg - sj.avg;
+    const rankCls = x.r === 1 ? 'gold' : x.r <= 3 ? 'good' : x.r <= 10 ? 'accent' : '';
+    return `<tr>
+      <td><span class="linkish" data-lens="${x.sjid}">${escapeHtml(sj.name)}</span></td>
+      <td class="num">${x.n}</td>
+      <td class="num">${x.p ? `<span class="pill gold">${x.p}</span>` : '0'}</td>
+      <td class="num">${x.top}</td>
+      <td class="num">${x.avg.toFixed(1)}</td>
+      <td class="num"><span class="muted" style="font-size:11px;">${sj.avg.toFixed(1)}</span></td>
+      <td>${strengthBar(diff)}</td>
+      <td class="num"><span class="pill ${rankCls}">${x.r}/${sj.numSchools}</span></td>
+    </tr>`;
+  }).join('');
+
+  // Top students with full subject breakdown chips
+  const topRows = s.topStudents.slice(0, 10).map(id => {
+    const st = d.students[id];
+    const top = Math.max(...st.sj.map(x => x[1]));
+    const chips = st.sj.slice().sort((a, b) => b[1] - a[1]).map(([sjid, sc]) =>
+      `<span class="chip-sm${sc === 50 ? ' perfect' : ''}">${escapeHtml(d.subjects[sjid].name)} <b>${sc}</b></span>`
+    ).join('');
+    return `<tr>
+      <td><span class="linkish" data-student-link="${id}">${escapeHtml(st.n)}</span><div class="subj-chips">${chips}</div></td>
+      <td class="num">${st.c}</td>
+      <td class="num">${st.s}</td>
+      <td class="num">${top === 50 ? `<span class="pill gold">${top}</span>` : top}</td>
+    </tr>`;
+  }).join('');
+
+  return `${headHtml}
+    <div class="detail-grid">
+      <div>
+        <div class="stat-tiles">${tilesHtml}</div>
+        <h4 class="section-title">Score distribution (40–50)</h4>
+        ${histHtml}
+        <div class="actions-row">
+          <button class="btn" data-action="filter-students" data-school="${s.id}">View all top students →</button>
+          <button class="btn" data-action="share" data-school="${s.id}">Copy link</button>
+        </div>
+      </div>
+      <div>
+        <h4 class="section-title">Subject strengths · sorted by rank</h4>
+        <table class="mini-table">
+          <thead><tr>
+            <th>Subject</th><th class="num">40+</th><th class="num">50s</th><th class="num">Top</th>
+            <th class="num">School avg</th><th class="num">State avg</th><th>vs State</th><th class="num">Rank</th>
+          </tr></thead>
+          <tbody>${subjRows || '<tr><td colspan="8" class="muted">No subject data.</td></tr>'}</tbody>
+        </table>
+        <h4 class="section-title" style="margin-top:16px;">Top students</h4>
+        <table class="mini-table">
+          <thead><tr><th>Student & subjects</th><th class="num">40+</th><th class="num">Sum</th><th class="num">Top</th></tr></thead>
+          <tbody>${topRows || '<tr><td colspan="4" class="muted">No students.</td></tr>'}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function histogramHTML(counts, total) {
+  const max = Math.max(1, ...Object.values(counts).map(Number));
+  const rows = [];
+  for (let sc = 50; sc >= 40; sc--) {
+    const c = counts[sc] || 0;
+    const pct = (c / max) * 100;
+    const grad = sc >= 48 ? 'var(--bar-gold)' : 'var(--bar)';
+    const sharePct = total ? ` (${((c/total)*100).toFixed(1)}%)` : '';
+    rows.push(`<div class="histogram"><span class="score">${sc}</span><div class="bar-wrap"><div class="bar" style="width:${pct}%;background:${grad}"></div></div><span class="num" title="${c}${sharePct}">${c}</span></div>`);
+  }
+  return rows.join('');
+}
+
+function attachDetailLinks(root) {
+  $$('[data-lens]', root).forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      const sjid = parseInt(el.dataset.lens, 10);
+      setLens(sjid);
+    });
+  });
+  $$('[data-student-link]', root).forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      const id = parseInt(el.dataset.studentLink, 10);
+      state.expandedStudent = id;
+      state.studentSchoolFilter = null;
+      state.studentSubjectFilter = null;
+      setTab('students');
+      renderStudents();
+      setTimeout(() => {
+        const open = $('#student-table tr.open');
+        if (open) open.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+      }, 30);
+    });
+  });
+  $$('[data-school-link]', root).forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      const id = parseInt(el.dataset.schoolLink, 10);
+      state.expandedSchool = id;
+      setTab('schools');
+      renderSchools();
+      navigate(`#/schools/${id}`);
+    });
+  });
+  $$('[data-action]', root).forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      const action = el.dataset.action;
+      const scid = parseInt(el.dataset.school, 10);
+      if (action === 'filter-students') {
+        state.studentSchoolFilter = scid;
+        state.studentSubjectFilter = null;
+        state.studentPage = 0;
+        setTab('students');
+        renderStudents();
+      } else if (action === 'share') {
+        const url = location.origin + location.pathname + `#/schools/${scid}`;
+        navigator.clipboard?.writeText(url);
+        el.textContent = 'Copied!';
+        setTimeout(() => { el.textContent = 'Copy link'; }, 1200);
+      }
+    });
+  });
+}
+
+function setLens(sjid) {
+  state.lensSubject = sjid;
+  state.expandedSchool = null;
+  state.schoolSort = sjid === null ? 'perfect' : 'lens-p';
+  rebuildSortOptions();
+  $('#lens-input').value = sjid === null ? '' : state.data.subjects[sjid].name;
+  $('#lens-wrap').classList.toggle('active', sjid !== null);
+  $('#lens-clear').classList.toggle('hide', sjid === null);
+  setTab('schools');
+  renderSchools();
+}
+
+// ---- Students tab ----
+function studentDetail(st) {
+  const d = state.data;
+  const school = d.schools[st.sc];
+  const chips = st.sj.slice().sort((a, b) => b[1] - a[1]).map(([sjid, sc]) =>
+    `<span class="chip-sm${sc === 50 ? ' perfect' : ''}"><span class="linkish" data-lens="${sjid}">${escapeHtml(d.subjects[sjid].name)}</span> <b>${sc}</b></span>`
+  ).join('');
+  return `<div>
+    <div class="muted" style="margin-bottom:8px;">From <span class="linkish" data-school-link="${st.sc}">${escapeHtml(school.name)}</span></div>
+    <div class="subj-chips">${chips}</div>
+  </div>`;
+}
+
+function renderStudentFilters() {
+  const d = state.data;
+  const wrap = $('#student-active-filters');
+  const chips = [];
+  if (state.studentSchoolFilter !== null && d.schools[state.studentSchoolFilter]) {
+    chips.push(`<span class="filter-chip">School: ${escapeHtml(d.schools[state.studentSchoolFilter].name)} <button class="x" data-clear="school">×</button></span>`);
+  }
+  if (state.studentSubjectFilter !== null && d.subjects[state.studentSubjectFilter]) {
+    chips.push(`<span class="filter-chip">Subject: ${escapeHtml(d.subjects[state.studentSubjectFilter].name)} <button class="x" data-clear="subject">×</button></span>`);
+  }
+  wrap.innerHTML = chips.join('');
+  $$('#student-active-filters [data-clear]').forEach(el => {
+    el.addEventListener('click', () => {
+      if (el.dataset.clear === 'school') state.studentSchoolFilter = null;
+      if (el.dataset.clear === 'subject') {
+        state.studentSubjectFilter = null;
+        $('#student-subject').value = '';
+      }
+      state.studentPage = 0;
+      renderStudents();
+    });
+  });
+}
+
+function renderStudents() {
+  const d = state.data;
+  const q = state.studentSearch.toLowerCase().trim();
+  let list = d.students;
+  if (state.studentMin > 0) list = list.filter(s => s.c >= state.studentMin);
+  if (state.studentSchoolFilter !== null) list = list.filter(s => s.sc === state.studentSchoolFilter);
+  if (state.studentSubjectFilter !== null) {
+    const sjid = state.studentSubjectFilter;
+    list = list.filter(s => s.sj.some(x => x[0] === sjid));
+  }
+  if (q) list = list.filter(s => s.n.toLowerCase().includes(q) || d.schools[s.sc].name.toLowerCase().includes(q));
+
+  const sort = state.studentSort;
+  const arr = list.slice();
+  arr.sort((a, b) => {
+    if (sort === 'name') return a.n.localeCompare(b.n);
+    if (sort === 'count') return b.c - a.c || b.s - a.s;
+    if (sort === 'max') {
+      const am = Math.max(...a.sj.map(x => x[1]));
+      const bm = Math.max(...b.sj.map(x => x[1]));
+      return bm - am || b.s - a.s;
+    }
+    return b.s - a.s || b.c - a.c;
+  });
+
+  const total = arr.length;
+  const pageSize = state.studentPageSize;
+  const pages = Math.max(1, Math.ceil(total / pageSize));
+  if (state.studentPage >= pages) state.studentPage = 0;
+  const start = state.studentPage * pageSize;
+  const slice = arr.slice(start, start + pageSize);
+  $('#student-count').textContent = `${total.toLocaleString()} student${total === 1 ? '' : 's'}`;
+  renderStudentFilters();
+
+  const tbody = $('#student-table tbody');
+  if (!slice.length) {
+    tbody.innerHTML = '';
+    $('#student-empty').classList.remove('hide');
+    $('#student-pagination').innerHTML = '';
+    return;
+  }
+  $('#student-empty').classList.add('hide');
+
+  const indexById = new Map();
+  d.students.forEach((s, i) => indexById.set(s, i));
+
+  const rows = slice.map((s, i) => {
+    const max = Math.max(...s.sj.map(x => x[1]));
+    const id = indexById.get(s);
+    const open = state.expandedStudent === id;
+    const detail = open ? `<tr class="detail-row"><td colspan="6">${studentDetail(s)}</td></tr>` : '';
+    return `<tr class="expandable${open ? ' open' : ''}" data-id="${id}">
+      <td class="rank">${start + i + 1}</td>
+      <td><span class="school-name-text">${highlight(s.n, q)}</span></td>
+      <td class="muted"><span class="linkish" data-school-link="${s.sc}">${highlight(d.schools[s.sc].name, q)}</span></td>
+      <td class="num">${s.c}</td>
+      <td class="num">${s.s}</td>
+      <td class="num">${max === 50 ? `<span class="pill gold">${max}</span>` : `<span class="pill">${max}</span>`}</td>
+    </tr>${detail}`;
+  }).join('');
+  tbody.innerHTML = rows;
+
+  $$('#student-table tr.expandable').forEach(tr => {
+    tr.addEventListener('click', () => {
+      const id = parseInt(tr.dataset.id, 10);
+      state.expandedStudent = state.expandedStudent === id ? null : id;
+      renderStudents();
+    });
+  });
+  attachDetailLinks($('#student-table'));
+
+  $('#student-pagination').innerHTML = pages > 1 ? `
+    <button id="prev" ${state.studentPage === 0 ? 'disabled' : ''}>← Prev</button>
+    <span>Page ${state.studentPage + 1} of ${pages}</span>
+    <button id="next" ${state.studentPage === pages - 1 ? 'disabled' : ''}>Next →</button>
+  ` : '';
+  const prev = $('#prev'), next = $('#next');
+  if (prev) prev.onclick = () => { state.studentPage--; renderStudents(); window.scrollTo({top: 0, behavior: 'smooth'}); };
+  if (next) next.onclick = () => { state.studentPage++; renderStudents(); window.scrollTo({top: 0, behavior: 'smooth'}); };
+}
+
+// ---- Tab + routing ----
+function setTab(t, push = true) {
+  state.tab = t;
+  $$('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
+  ['schools', 'students'].forEach(name => $('#tab-' + name).classList.toggle('hide', name !== t));
+  if (push) {
+    const hash = '#/' + t;
+    if (location.hash !== hash && location.hash.indexOf('#/' + t) !== 0) history.replaceState(null, '', hash);
+  }
+}
+
+function navigate(hash) {
+  if (location.hash !== hash) history.replaceState(null, '', hash);
+}
+
+function applyHash() {
+  const h = location.hash.replace(/^#\/?/, '');
+  const parts = h.split('/').filter(Boolean);
+  if (!parts.length) { setTab('schools', false); return; }
+  const [tab, ...rest] = parts;
+  if (['schools', 'students'].includes(tab)) setTab(tab, false);
+  if (tab === 'schools' && rest[0] !== undefined) {
+    state.expandedSchool = parseInt(rest[0], 10);
+    renderSchools();
+    setTimeout(() => {
+      const open = $('#school-table tr.open');
+      if (open) open.scrollIntoView({behavior: 'smooth', block: 'center'});
+    }, 50);
+  }
+}
+
+// ---- Init ----
+function init() {
+  renderStats();
+  const subjOpts = state.data.subjects.slice().sort((a, b) => a.name.localeCompare(b.name));
+  $('#subjects-datalist').innerHTML = subjOpts.map(s => `<option value="${escapeHtml(s.name)}">`).join('');
+  $('#student-subject').innerHTML = '<option value="">Any subject</option>' + subjOpts.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
+
+  rebuildSortOptions();
+  renderSchools();
+  renderStudents();
+
+  $$('.tab').forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
+
+  $('#school-search').addEventListener('input', debounce(e => {
+    state.schoolSearch = e.target.value;
+    state.expandedSchool = null;
+    renderSchools();
+  }, 120));
+  $('#school-sort').addEventListener('change', e => { state.schoolSort = e.target.value; renderSchools(); });
+  $('#school-min').addEventListener('change', e => { state.schoolMin = parseInt(e.target.value, 10); renderSchools(); });
+
+  // Subject lens
+  const lensInput = $('#lens-input');
+  lensInput.addEventListener('input', () => {
+    const v = lensInput.value.trim().toLowerCase();
+    if (!v) { setLens(null); return; }
+    const sj = state.data.subjects.find(s => s.name.toLowerCase() === v);
+    if (sj) setLens(sj.id);
+  });
+  lensInput.addEventListener('focus', () => lensInput.select());
+  $('#lens-clear').addEventListener('click', () => { setLens(null); lensInput.focus(); });
+
+  $('#student-search').addEventListener('input', debounce(e => {
+    state.studentSearch = e.target.value;
+    state.studentPage = 0;
+    state.expandedStudent = null;
+    renderStudents();
+  }, 150));
+  $('#student-sort').addEventListener('change', e => { state.studentSort = e.target.value; state.studentPage = 0; renderStudents(); });
+  $('#student-min').addEventListener('change', e => { state.studentMin = parseInt(e.target.value, 10); state.studentPage = 0; renderStudents(); });
+  $('#student-subject').addEventListener('change', e => {
+    const v = e.target.value;
+    state.studentSubjectFilter = v ? parseInt(v, 10) : null;
+    state.studentPage = 0;
+    renderStudents();
+  });
+
+  window.addEventListener('hashchange', applyHash);
+  applyHash();
+}
+
+load();
+</script>
+</body>
+</html>
